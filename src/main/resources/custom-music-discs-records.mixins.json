@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "me.syberiaK.cmdr.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+  ],
+  "client": [
+    "UselessMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
