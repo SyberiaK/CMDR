@@ -12,11 +12,11 @@ import java.net.URL;
 import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.ImageIcon;
 import javax.swing.UIManager;
+import javax.swing.JOptionPane;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
@@ -53,7 +53,7 @@ public class ManagerMenu extends JFrame {
                 String icon = song.toLowerCase() + ".png";
                 URL iconURL = CMDR.class.getResource("/sprites/" + icon);
 
-                MMDiscButton b = new MMDiscButton(MMDiscButton.MENU, song, fullName, audio, iconURL);
+                MMDiscButton b = new MMDiscButton(song, fullName, audio, iconURL);
                 buttonsPanel.add(b);
             }
         } catch (Exception e) { throw new RuntimeException(e); }
@@ -109,7 +109,7 @@ public class ManagerMenu extends JFrame {
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setIconImage(defaultDiscIcon.getImage());
         this.setResizable(false);
-        this.setSize(640, 500);
+        this.setBounds(150, 150, 640, 500);
     }
     
     void changeDiscLabel(ImageIcon icon, String discFullName) {

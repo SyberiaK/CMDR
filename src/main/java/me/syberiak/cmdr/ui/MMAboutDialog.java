@@ -22,6 +22,7 @@ public class MMAboutDialog extends JDialog {
             ImageIcon discImageIcon = new ImageIcon(CMDR.ICON_URL);
             this.setIconImage(discImageIcon.getImage());
         }
+
         this.setLayout(new BorderLayout());
 
         GridBagConstraints c = new GridBagConstraints();
@@ -51,7 +52,7 @@ public class MMAboutDialog extends JDialog {
         textPanel.add(detailedLabel, c);
 
         c.fill = GridBagConstraints.HORIZONTAL;
-        c.ipady = 0;       //reset to default
+        c.ipady = 0;
         c.weightx = 1;
         c.weighty = 1;
         c.anchor = GridBagConstraints.LAST_LINE_END;
@@ -68,7 +69,8 @@ public class MMAboutDialog extends JDialog {
 
         this.add(textPanel, BorderLayout.CENTER);
         this.add(buttonPanel, BorderLayout.PAGE_END);
-        this.setBounds(100, 100, 480, 360);
+
+        this.setBounds(150, 150, 480, 360);
         this.setResizable(false);
         this.setVisible(true);
     }

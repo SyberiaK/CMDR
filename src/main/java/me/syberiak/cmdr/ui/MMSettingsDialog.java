@@ -146,7 +146,7 @@ public class MMSettingsDialog extends JDialog  {
         // buttonsPanel.setBackground(new Color(255, 0, 0));
         this.add(pathToMinecraftInput, BorderLayout.CENTER);
         this.add(buttonsPanel, BorderLayout.PAGE_END);
-        this.setBounds(100, 100, 480, 360);
+        this.setBounds(150, 150, 480, 360);
         this.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
                 try {

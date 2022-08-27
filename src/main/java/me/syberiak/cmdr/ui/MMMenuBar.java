@@ -16,7 +16,9 @@ public class MMMenuBar extends JMenuBar {
         settingsItem.addActionListener(e -> new MMSettingsDialog());
         aboutItem.addActionListener(e -> new MMAboutDialog());
 
-        menu.add(settingsItem); menu.add(aboutItem);
+        menu.add(settingsItem);
+        menu.add(aboutItem);
+
         this.add(menu);
     }
 }

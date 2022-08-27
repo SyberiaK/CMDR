@@ -3,17 +3,18 @@ package me.syberiak.cmdr;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.InputStream;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.net.URL;
 import java.util.List;
-import javax.swing.*;
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 
-import me.syberiak.cmdr.util.CSVReader;
-import me.syberiak.cmdr.util.StreamUtil;
 import org.json.JSONObject;
 
 import me.syberiak.cmdr.ui.ManagerMenu;
+import me.syberiak.cmdr.util.CSVReader;
+import me.syberiak.cmdr.util.StreamUtil;
 import me.syberiak.cmdr.settings.Settings;
 import me.syberiak.cmdr.settings.SettingsContainer;
 
