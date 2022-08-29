@@ -1,6 +1,7 @@
 package me.syberiak.cmdr.util;
 
 import java.io.File;
+import java.util.Arrays;
 
 import ws.schild.jave.Encoder;
 import ws.schild.jave.EncoderException;
@@ -40,16 +41,22 @@ public class OGGAudioConverter implements Runnable {
             exception = e;
             success = false;
         }
-        System.out.println(source + ": converted successfully to " + target);
         success = true;
     }
 
     Pair<Boolean, Exception> getResult() { return new Pair<>(success, exception); }
+
     public static Pair<Boolean, Exception> convert(String source, String target) throws InterruptedException {
-        if (!(source.endsWith(".mp3") || source.endsWith(".wav"))) {
+        String[] formats = {".mp3", ".wav", ".ogg"};
+
+        boolean isCorrectFormat = Arrays.asList(formats).contains(
+                source.substring(source.lastIndexOf('.') + 1));
+
+        if (!isCorrectFormat) {
             return new Pair<>(false,
-                    new Exception("Wrong source file extension (only .mp3 and .wav supported)"));
+                    new Exception("Wrong source file extension (.mp3, .wav and .ogg supported)"));
         }
+
         OGGAudioConverter ac = new OGGAudioConverter(source, target);
         Thread convertThread = new Thread(ac);
 

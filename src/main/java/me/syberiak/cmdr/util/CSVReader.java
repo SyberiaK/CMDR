@@ -1,8 +1,6 @@
 package me.syberiak.cmdr.util;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.BufferedReader;
+import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.Files;
@@ -12,11 +10,11 @@ import java.util.ArrayList;
 
 public class CSVReader {
 
-    public static List<String[]> readDataFromCSV(String filename, String delimiter) {
+    public static List<String[]> readDataFromCSV(String filename, String delimiter) throws IOException {
         return readDataFromCSV(Paths.get(new File(filename).getAbsolutePath()), delimiter);
     }
 
-    public static List<String[]> readDataFromCSV(Path filepath, String delimiter) {
+    public static List<String[]> readDataFromCSV(Path filepath, String delimiter) throws IOException {
         List<String[]> data = new ArrayList<>();
 
         try (BufferedReader br = Files.newBufferedReader(filepath,
@@ -30,7 +28,25 @@ public class CSVReader {
 
                 line = br.readLine();
             }
-        } catch (IOException e) { e.printStackTrace(); }
+        }
+
+        return data;
+    }
+
+    public static List<String[]> readDataFromCSV(InputStream inputStream, String delimiter) throws IOException {
+        List<String[]> data = new ArrayList<>();
+
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))) {
+
+            String line = br.readLine();
+
+            while (line != null) {
+                String[] attributes = line.split(delimiter);
+                data.add(attributes);
+
+                line = br.readLine();
+            }
+        }
 
         return data;
     }
