@@ -7,8 +7,6 @@ import javax.swing.JMenuItem;
 public class MMMenuBar extends JMenuBar {
 
     public MMMenuBar() {
-        super();
-
         JMenu menu = new JMenu("...");
         JMenuItem settingsItem = new JMenuItem("Settings");
         JMenuItem aboutItem = new JMenuItem("About");

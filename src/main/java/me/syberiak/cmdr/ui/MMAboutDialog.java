@@ -15,6 +15,9 @@ import me.syberiak.cmdr.CMDR;
 
 public class MMAboutDialog extends JDialog {
 
+    static final int DIALOG_WIDTH = 480;
+    static final int DIALOG_HEIGHT = 360;
+
     public MMAboutDialog() {
         super(CMDR.manager, "CMDR Manager", true);
 
@@ -70,7 +73,7 @@ public class MMAboutDialog extends JDialog {
         this.add(textPanel, BorderLayout.CENTER);
         this.add(buttonPanel, BorderLayout.PAGE_END);
 
-        this.setBounds(150, 150, 480, 360);
+        this.setBounds(150, 150, DIALOG_WIDTH, DIALOG_HEIGHT);
         this.setResizable(false);
         this.setVisible(true);
     }

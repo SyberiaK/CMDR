@@ -16,6 +16,9 @@ import javax.swing.ImageIcon;
 import me.syberiak.cmdr.CMDR;
 public class MMDiscDialog extends JDialog {
 
+    static final int DIALOG_WIDTH = 480;
+    static final int DIALOG_HEIGHT = 360;
+
     public MMDiscDialog(String discFullName, String record, ImageIcon discIcon) {
         super(CMDR.manager, "CMDR Manager", true);
         this.setLayout(new BorderLayout());
@@ -62,7 +65,7 @@ public class MMDiscDialog extends JDialog {
         this.add(contentPanel, BorderLayout.CENTER);
         this.add(bottomMargin, BorderLayout.PAGE_END);
 
-        this.setBounds(150, 150, 480, 360);
+        this.setBounds(150, 150, DIALOG_WIDTH, DIALOG_HEIGHT);
         this.setIconImage(discIcon.getImage());
         this.setResizable(false);
         this.setVisible(true);
