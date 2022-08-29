@@ -76,8 +76,7 @@ public class ManagerMenu extends JFrame {
 
         JLabel appName = new JLabel("CMDR v" + CMDR.VERSION);
         appName.setFont(new Font(null, Font.BOLD, 20));
-        JTextArea appDescription = new JTextArea("This is a placeholder of description where I need to tell you" +
-                " how to use this application. Or maybe there will be some patch notes. Dunno.");
+        JTextArea appDescription = new JTextArea(String.join("\n", CMDR.CHANGELOG));
         appDescription.setWrapStyleWord(true);
         appDescription.setLineWrap(true);
         appDescription.setOpaque(false);
@@ -104,11 +103,11 @@ public class ManagerMenu extends JFrame {
         c.anchor = GridBagConstraints.FIRST_LINE_START;
         labelsPanel.add(appName, c);
 
-        c.insets = new Insets(10, 2, 0, 2);
+        c.insets = new Insets(10, 2, 5, 2);
         c.anchor = GridBagConstraints.CENTER;
         labelsPanel.add(appDescription, c);
         
-        c.insets = new Insets(25, 0, 0, 10);
+        c.insets = new Insets(20, 0, 0, 10);
         labelsPanel.add(discLabel, c);
 
         c.anchor = GridBagConstraints.LAST_LINE_END;
