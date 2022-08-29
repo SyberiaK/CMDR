@@ -45,7 +45,8 @@ public class MMSettingsDialog extends JDialog  {
 
         JLabel pathToMinecraftLabel = new JLabel("Minecraft directory:");
         JTextField pathToMinecraftTextField = new JTextField();
-        pathToMinecraftTextField.setToolTipText("Path to Minecraft directory (usually C:\\Users\\[USER]\\AppData\\Roaming\\.minecraft)");
+        pathToMinecraftTextField.setToolTipText(String.format("Path to Minecraft directory (default is %s)",
+                CMDR.DEFAULT_MINECRAFT_PATH));
         pathToMinecraftTextField.setText(CMDR.MINECRAFT_PATH);
         pathToMinecraftTextField.setPreferredSize(new Dimension(300, 25));
 

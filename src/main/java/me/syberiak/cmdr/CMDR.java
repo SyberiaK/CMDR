@@ -29,17 +29,25 @@ public class CMDR {
                                         "- OGG audio support"};
     public static final URL ICON_URL = CMDR.class.getResource("/icon.png");
     public static List<String[]> MUSIC_DATA;
+
+    public static final String OS = System.getProperty("os.name").toLowerCase();
     public static String CURRENT_USER_ROAMING;
     static {
-        String os = System.getProperty("os.name");
         CURRENT_USER_ROAMING = System.getProperty("user.home");
 
-        if (os.contains("mac") || os.contains("darwin")) {
-            CURRENT_USER_ROAMING += "/Library/Application Support/";
-        } else if (os.contains("nix") || os.contains("nux") || os.contains("aix")) {
-            CURRENT_USER_ROAMING += "/.minecraft";
-        } else {
+        if (OS.contains("mac") || OS.contains("darwin")) {
+            CURRENT_USER_ROAMING += "/Library/Application Support";
+        } else if (OS.contains("win")) {
             CURRENT_USER_ROAMING = System.getenv("APPDATA");
+        }
+    }
+    public static String DEFAULT_MINECRAFT_PATH;
+    static {
+        DEFAULT_MINECRAFT_PATH = CURRENT_USER_ROAMING + File.separator;
+        if (OS.contains("mac")) {
+            DEFAULT_MINECRAFT_PATH += "minecraft";
+        } else {
+            DEFAULT_MINECRAFT_PATH += ".minecraft";
         }
     }
 
@@ -55,11 +63,12 @@ public class CMDR {
 
     static String logFileLocation;
     static {
-        if (System.getProperty("os.name").contains("mac")) {
-            logFileLocation = System.getProperty("user.home") + "/Library/Application Support/CMDR/logs";
+        if (OS.contains("win")) {
+            logFileLocation = System.getenv("LOCALAPPDATA");
         } else {
-            logFileLocation = System.getenv("LOCALAPPDATA") + "/CMDR/logs";
+            logFileLocation = CURRENT_USER_ROAMING;
         }
+        logFileLocation += "/CMDR/logs";
         System.setProperty("CMDR.logs", logFileLocation);
     }
     public static final Logger LOGGER = LoggerFactory.getLogger(CMDR.class);
@@ -122,11 +131,10 @@ public class CMDR {
 
             MINECRAFT_PATH = settings.getPathToMinecraft();
             if (MINECRAFT_PATH.equals("<PATH HERE>")) {
-                String defaultMinecraftPath = CURRENT_USER_ROAMING + File.separator + ".minecraft";
-                if (!new File(defaultMinecraftPath).exists()) {
-                    defaultMinecraftPath = "<NOT DEFAULT>";
+                if (!new File(DEFAULT_MINECRAFT_PATH).exists()) {
+                    DEFAULT_MINECRAFT_PATH = "<NOT DEFAULT>";
                 }
-                settings.setPathToMinecraft(defaultMinecraftPath);
+                settings.setPathToMinecraft(DEFAULT_MINECRAFT_PATH);
                 Settings.editSettings(SETTINGS_DIR, settings);
                 MINECRAFT_PATH = settings.getPathToMinecraft();
             }
