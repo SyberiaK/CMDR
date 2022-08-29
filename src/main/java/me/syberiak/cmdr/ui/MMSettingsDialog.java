@@ -26,6 +26,9 @@ import me.syberiak.cmdr.settings.SettingsContainer;
 
 public class MMSettingsDialog extends JDialog  {
 
+    static final int DIALOG_WIDTH = 480;
+    static final int DIALOG_HEIGHT = 360;
+
     public MMSettingsDialog() {
         super(CMDR.manager, "CMDR Manager", true);
 
@@ -75,7 +78,7 @@ public class MMSettingsDialog extends JDialog  {
         closeButton.setPreferredSize(new Dimension(50, 25));
         closeButton.setFocusable(false);
 
-        saveButton.addActionListener(e -> {
+        saveButton.addActionListener(o -> {
             try {
                 SettingsContainer settings = Settings.readSettings(CMDR.SETTINGS_DIR);
                 Path path = Paths.get(pathToMinecraftTextField.getText());
@@ -94,26 +97,14 @@ public class MMSettingsDialog extends JDialog  {
                 }
                 Settings.editSettings(CMDR.SETTINGS_DIR, settings);
                 CMDR.getSettings();
-            } catch (Exception ee) { throw new RuntimeException(ee); }
+            } catch (Exception e) {
+                CMDR.LOGGER.error("Error occurred!", e);
+                throw new RuntimeException(e);
+            }
         });
 
-        closeButton.addActionListener(e -> {
-            try {
-                SettingsContainer settings = Settings.readSettings(CMDR.SETTINGS_DIR);
-                if (!settings.getPathToMinecraft().equals(pathToMinecraftTextField.getText())) {
-                    int option = JOptionPane.showOptionDialog(this,
-                            "Are you sure you want to close? " +
-                                    "You will lose all unsaved changes.", "CMDR Manager",
-                            JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE,
-                            null, null,null);
-                    if (option == JOptionPane.YES_OPTION) {
-                        this.dispose();
-                    }
-                } else {
-                    this.dispose();
-                }
-            } catch (Exception ee) { throw new RuntimeException(ee); }
-        });
+        closeButton.addActionListener(e -> this.dispatchEvent(
+                new WindowEvent(this, WindowEvent.WINDOW_CLOSING)));
 
         c.insets = new Insets(0, 0, 0, 10);
         c.gridx = 0;
@@ -143,14 +134,14 @@ public class MMSettingsDialog extends JDialog  {
         buttonsPanel.add(saveButton, c);
         buttonsPanel.add(closeButton, c);
 
-        // buttonsPanel.setBackground(new Color(255, 0, 0));
         this.add(pathToMinecraftInput, BorderLayout.CENTER);
         this.add(buttonsPanel, BorderLayout.PAGE_END);
-        this.setBounds(150, 150, 480, 360);
+        this.setBounds(150, 150, DIALOG_WIDTH, DIALOG_HEIGHT);
+        this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         this.addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent e) {
+            public void windowClosing(WindowEvent we) {
                 try {
-                    Window window = e.getWindow();
+                    Window window = we.getWindow();
                     SettingsContainer settings = Settings.readSettings(CMDR.SETTINGS_DIR);
                     if (!settings.getPathToMinecraft().equals(pathToMinecraftTextField.getText())) {
                         int option = JOptionPane.showOptionDialog(window,
@@ -164,7 +155,10 @@ public class MMSettingsDialog extends JDialog  {
                     } else {
                         window.dispose();
                     }
-                } catch (Exception ee) { throw new RuntimeException(ee); }
+                } catch (Exception e) {
+                    CMDR.LOGGER.error("Error occurred!", e);
+                    throw new RuntimeException(e);
+                }
             }
         });
         this.setResizable(false);

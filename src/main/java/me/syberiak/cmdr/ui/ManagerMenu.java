@@ -26,6 +26,8 @@ import me.syberiak.cmdr.util.OGGAudioConverter;
 
 public class ManagerMenu extends JFrame {
 
+    static final int FRAME_WIDTH = 640;
+    static final int FRAME_HEIGHT = 500;
     JLabel discLabel;
     JLabel statusBar;
 
@@ -38,6 +40,17 @@ public class ManagerMenu extends JFrame {
             defaultDiscIcon = new ImageIcon(CMDR.ICON_URL);
         }
 
+        if (UIManager.getLookAndFeel().isSupportedLookAndFeel()) {
+            final String platform = UIManager.getSystemLookAndFeelClassName();
+            if (!UIManager.getLookAndFeel().getName().equals(platform)) {
+                try {
+                    UIManager.setLookAndFeel(platform);
+                } catch (Exception e) {
+                    CMDR.LOGGER.error("Exception occurred!", e);
+                }
+            }
+        }
+
         MMMenuBar menuBar = new MMMenuBar();
 
         JPanel buttonsPanel = new JPanel(new GridLayout(0, 2));
@@ -48,7 +61,7 @@ public class ManagerMenu extends JFrame {
                 String author = item[0];
                 String song = item[1];
 
-                String fullName = String.format("%s - %s", author, song);
+                String fullName = author + " - " + song;
                 String audio = song.toLowerCase() + ".ogg";
                 String icon = song.toLowerCase() + ".png";
                 URL iconURL = CMDR.class.getResource("/sprites/" + icon);
@@ -62,17 +75,18 @@ public class ManagerMenu extends JFrame {
         GridBagConstraints c = new GridBagConstraints();
         labelsPanel.setPreferredSize(new Dimension(200, 100));
 
-        JLabel modName = new JLabel("CMDR v" + CMDR.VERSION);
-        modName.setFont(new Font(null, Font.BOLD, 20));
-        JTextArea modDescription = new JTextArea("This is a placeholder of description where I need to tell you how to use program. Or maybe there will be some patch notes. Dunno.");
-        modDescription.setWrapStyleWord(true);
-        modDescription.setLineWrap(true);
-        modDescription.setOpaque(false);
-        modDescription.setEditable(false);
-        modDescription.setFocusable(false);
-        modDescription.setBackground(UIManager.getColor("Label.background"));
-        modDescription.setFont(UIManager.getFont("Label.font"));
-        modDescription.setBorder(UIManager.getBorder("Label.border"));
+        JLabel appName = new JLabel("CMDR v" + CMDR.VERSION);
+        appName.setFont(new Font(null, Font.BOLD, 20));
+        JTextArea appDescription = new JTextArea("This is a placeholder of description where I need to tell you" +
+                " how to use this application. Or maybe there will be some patch notes. Dunno.");
+        appDescription.setWrapStyleWord(true);
+        appDescription.setLineWrap(true);
+        appDescription.setOpaque(false);
+        appDescription.setEditable(false);
+        appDescription.setFocusable(false);
+        appDescription.setBackground(UIManager.getColor("Label.background"));
+        appDescription.setFont(UIManager.getFont("Label.font"));
+        appDescription.setBorder(UIManager.getBorder("Label.border"));
         
         discLabel = new JLabel("Choose music disc...");
         discLabel.setIcon(defaultDiscIcon);
@@ -89,11 +103,11 @@ public class ManagerMenu extends JFrame {
         c.insets = new Insets(10, 2, 0, 0);
         c.gridy = GridBagConstraints.RELATIVE;
         c.anchor = GridBagConstraints.FIRST_LINE_START;
-        labelsPanel.add(modName, c);
+        labelsPanel.add(appName, c);
 
         c.insets = new Insets(10, 2, 0, 2);
         c.anchor = GridBagConstraints.CENTER;
-        labelsPanel.add(modDescription, c);
+        labelsPanel.add(appDescription, c);
         
         c.insets = new Insets(25, 0, 0, 10);
         labelsPanel.add(discLabel, c);
@@ -109,7 +123,7 @@ public class ManagerMenu extends JFrame {
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setIconImage(defaultDiscIcon.getImage());
         this.setResizable(false);
-        this.setBounds(150, 150, 640, 500);
+        this.setBounds(150, 150, FRAME_WIDTH, FRAME_HEIGHT);
     }
     
     void changeDiscLabel(ImageIcon icon, String discFullName) {
@@ -121,37 +135,39 @@ public class ManagerMenu extends JFrame {
         File recordFile = new File(CMDR.RECORD_DIR + record);
         if (recordFile.exists()) {
             if (recordFile.delete()) {
-                System.out.println(record + ": returned default record successfully.");
+                CMDR.LOGGER.info(record + ": returned default record successfully.");
             }
             else {
-                System.out.println(record + ": failed to return default record.");
+                CMDR.LOGGER.error(record + ": failed to return default record.");
             }
         }
     }
 
     void setCustomRecord(String record) {
         JFileChooser fc = new JFileChooser();
-        fc.setFileFilter(new FileNameExtensionFilter("MP3/WAV audio (*.mp3, *.wav)", "mp3", "wav"));
+        fc.setFileFilter(new FileNameExtensionFilter("MP3/WAV/OGG audio (*.mp3, *.wav, *.ogg)",
+                "mp3", "wav", "ogg"));
 
         int fcOption = fc.showOpenDialog(this);
         if (fcOption == JFileChooser.APPROVE_OPTION) {
             statusBar.setText("Trying to convert your audio...");
             try {
-                Pair<Boolean, Exception> result = OGGAudioConverter.convert(fc.getSelectedFile().getAbsolutePath(),
-                        CMDR.RECORD_DIR + record);
+                String source = fc.getSelectedFile().getAbsolutePath();
+                String target = CMDR.RECORD_DIR + record;
+
+                Pair<Boolean, Exception> result = OGGAudioConverter.convert(source, target);
                 boolean success = result.element0();
                 if (success) {
+                    CMDR.LOGGER.info(source + ": converted successfully to " + target);
                     statusBar.setText("Done!");
                 } else {
-                    Exception exception = result.element1();
-
-                    JOptionPane.showMessageDialog(this,
-                            "Got an exception while converting: " + exception, "CMDR Manager",
-                            JOptionPane.WARNING_MESSAGE);
-                    statusBar.setText("");
+                    throw result.element1();
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                CMDR.LOGGER.error("Converting exception occurred!", e);
+                JOptionPane.showMessageDialog(this,
+                        "Got an exception while converting: " + e, "CMDR Manager",
+                        JOptionPane.WARNING_MESSAGE);
                 statusBar.setText("");
             }
         }
