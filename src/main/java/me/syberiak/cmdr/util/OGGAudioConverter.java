@@ -47,14 +47,15 @@ public class OGGAudioConverter implements Runnable {
     Pair<Boolean, Exception> getResult() { return new Pair<>(success, exception); }
 
     public static Pair<Boolean, Exception> convert(String source, String target) throws InterruptedException {
-        String[] formats = {".mp3", ".wav", ".ogg"};
+        String[] formats = {"mp3", "wav", "ogg"};
 
         boolean isCorrectFormat = Arrays.asList(formats).contains(
                 source.substring(source.lastIndexOf('.') + 1));
 
         if (!isCorrectFormat) {
             return new Pair<>(false,
-                    new Exception("Wrong source file extension (.mp3, .wav and .ogg supported)"));
+                    new Exception(String.format("Wrong source file extension of %s" +
+                            " (.mp3, .wav and .ogg supported)", source)));
         }
 
         OGGAudioConverter ac = new OGGAudioConverter(source, target);
