@@ -87,10 +87,10 @@ public class CMDR {
 
         try {
             if (Settings.readSettings(SETTINGS_DIR).getPathToMinecraft().equals("<NOT DEFAULT>")) {
-                LOGGER.warn("CMDR cannot find the Minecraft directory." +
+                LOGGER.warn("CMDR cannot find the Minecraft directory. " +
                         "Please set the path to the game directory manually in settings.");
                 JOptionPane.showMessageDialog(manager,
-                        "CMDR cannot find the Minecraft directory." +
+                        "CMDR cannot find the Minecraft directory.\n" +
                                 "Please set the path to the game directory manually in settings.",
                         "CMDR Manager", JOptionPane.WARNING_MESSAGE);
             }

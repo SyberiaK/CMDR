@@ -21,7 +21,6 @@ import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import me.syberiak.cmdr.CMDR;
-import me.syberiak.cmdr.util.Pair;
 import me.syberiak.cmdr.util.OGGAudioConverter;
 
 public class ManagerMenu extends JFrame {
@@ -155,18 +154,13 @@ public class ManagerMenu extends JFrame {
                 String source = fc.getSelectedFile().getAbsolutePath();
                 String target = CMDR.RECORD_DIR + record;
 
-                Pair<Boolean, Exception> result = OGGAudioConverter.convert(source, target);
-                boolean success = result.element0();
-                if (success) {
-                    CMDR.LOGGER.info(source + ": converted successfully to " + target);
-                    statusBar.setText("Done!");
-                } else {
-                    throw result.element1();
-                }
+                OGGAudioConverter.convert(source, target);
+                CMDR.LOGGER.info(source + ": converted successfully to " + target);
+                statusBar.setText("Done!");
             } catch (Exception e) {
                 CMDR.LOGGER.error("Converting exception occurred!", e);
                 JOptionPane.showMessageDialog(this,
-                        "Got an exception while converting: " + e, "CMDR Manager",
+                        "Got an exception while converting:\n" + e, "CMDR Manager",
                         JOptionPane.WARNING_MESSAGE);
                 statusBar.setText("");
             }
