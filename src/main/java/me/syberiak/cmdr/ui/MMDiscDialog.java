@@ -65,7 +65,8 @@ public class MMDiscDialog extends JDialog {
         this.add(contentPanel, BorderLayout.CENTER);
         this.add(bottomMargin, BorderLayout.PAGE_END);
 
-        this.setBounds(150, 150, DIALOG_WIDTH, DIALOG_HEIGHT);
+        this.setBounds(ManagerMenu.WINDOW_POSITION_X, ManagerMenu.WINDOW_POSITION_Y,
+                       DIALOG_WIDTH, DIALOG_HEIGHT);
         this.setIconImage(discIcon.getImage());
         this.setResizable(false);
         this.setVisible(true);

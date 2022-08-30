@@ -27,6 +27,9 @@ public class ManagerMenu extends JFrame {
 
     static final int FRAME_WIDTH = 640;
     static final int FRAME_HEIGHT = 500;
+
+    public static final int WINDOW_POSITION_X = 150;
+    public static final int WINDOW_POSITION_Y = 150;
     JLabel discLabel;
     JLabel statusBar;
 
@@ -76,15 +79,14 @@ public class ManagerMenu extends JFrame {
 
         JLabel appName = new JLabel("CMDR v" + CMDR.VERSION);
         appName.setFont(new Font(null, Font.BOLD, 20));
-        JTextArea appDescription = new JTextArea(String.join("\n", CMDR.CHANGELOG));
-        appDescription.setWrapStyleWord(true);
-        appDescription.setLineWrap(true);
-        appDescription.setOpaque(false);
-        appDescription.setEditable(false);
-        appDescription.setFocusable(false);
-        appDescription.setBackground(UIManager.getColor("Label.background"));
-        appDescription.setFont(UIManager.getFont("Label.font"));
-        appDescription.setBorder(UIManager.getBorder("Label.border"));
+        JTextArea appChangelog = new JTextArea(String.join("\n", CMDR.LATEST_CHANGELOG));
+        appChangelog.setWrapStyleWord(true);
+        appChangelog.setLineWrap(true);
+        appChangelog.setEditable(false);
+        appChangelog.setFocusable(false);
+        appChangelog.setBackground(UIManager.getColor("Label.background"));
+        appChangelog.setFont(UIManager.getFont("Label.font"));
+        appChangelog.setBorder(UIManager.getBorder("Label.border"));
         
         discLabel = new JLabel("Choose music disc...");
         discLabel.setIcon(defaultDiscIcon);
@@ -105,13 +107,13 @@ public class ManagerMenu extends JFrame {
 
         c.insets = new Insets(10, 2, 5, 2);
         c.anchor = GridBagConstraints.CENTER;
-        labelsPanel.add(appDescription, c);
+        labelsPanel.add(appChangelog, c);
         
         c.insets = new Insets(20, 0, 0, 10);
         labelsPanel.add(discLabel, c);
 
         c.anchor = GridBagConstraints.LAST_LINE_END;
-        c.insets = new Insets(100, 2, 5, 0);
+        c.insets = new Insets(75, 2, 5, 0);
         labelsPanel.add(statusBar, c);
 
         this.setJMenuBar(menuBar);
@@ -121,7 +123,7 @@ public class ManagerMenu extends JFrame {
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setIconImage(defaultDiscIcon.getImage());
         this.setResizable(false);
-        this.setBounds(150, 150, FRAME_WIDTH, FRAME_HEIGHT);
+        this.setBounds(WINDOW_POSITION_X, WINDOW_POSITION_Y, FRAME_WIDTH, FRAME_HEIGHT);
     }
     
     void changeDiscLabel(ImageIcon icon, String discFullName) {

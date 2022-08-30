@@ -134,7 +134,8 @@ public class MMSettingsDialog extends JDialog  {
 
         this.add(pathToMinecraftInput, BorderLayout.CENTER);
         this.add(buttonsPanel, BorderLayout.PAGE_END);
-        this.setBounds(150, 150, DIALOG_WIDTH, DIALOG_HEIGHT);
+        this.setBounds(ManagerMenu.WINDOW_POSITION_X, ManagerMenu.WINDOW_POSITION_Y,
+                       DIALOG_WIDTH, DIALOG_HEIGHT);
         this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         this.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent we) {
