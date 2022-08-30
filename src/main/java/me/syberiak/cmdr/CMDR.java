@@ -23,7 +23,7 @@ public class CMDR {
 
     public static String VERSION = "0.2.0";
 
-    public static final String[] MAJOR_CHANGELOG = {"Major changelog (0.1.:",
+    public static final String[] MAJOR_CHANGELOG = {"Major changelog (0.1.0):",
                                                     "- Added logging",
                                                     "- System look and feel",
                                                     "- MacOS and Linux support (not tested)",
