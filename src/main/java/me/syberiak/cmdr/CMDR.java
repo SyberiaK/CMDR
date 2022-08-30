@@ -22,12 +22,20 @@ import me.syberiak.cmdr.util.CSVReader;
 public class CMDR {
 
     public static String VERSION = "0.1.0";
-    public static String[] CHANGELOG = {"- Added logging",
-                                        "- System look and feel",
-                                        "- MacOS and Linux support (not tested)",
-                                        "- Code improvements",
-                                        "- Exception notifs improvements",
-                                        "- OGG audio support"};
+
+    public static final String[] MAJOR_CHANGELOG = {"Major changelog:",
+                                                    "- Added logging",
+                                                    "- System look and feel",
+                                                    "- MacOS and Linux support (not tested)",
+                                                    "- Code improvements",
+                                                    "- Exception notifs improvements",
+                                                    "- OGG audio support"};
+    public static final String[] LATEST_CHANGELOG = {"Latest changelog:",
+                                                     "- \"About\" showing major and latest changelog",
+                                                     "- Showing latest changelog in main frame",
+                                                     "- Improved multiplatform support",
+                                                     "- Settings file is now in appdata"};
+
     public static final URL ICON_URL = CMDR.class.getResource("/icon.png");
     public static List<String[]> MUSIC_DATA;
 
