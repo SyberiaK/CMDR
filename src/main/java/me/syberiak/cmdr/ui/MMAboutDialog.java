@@ -1,15 +1,7 @@
 package me.syberiak.cmdr.ui;
 
-import java.awt.Insets;
-import java.awt.Dimension;
-import java.awt.BorderLayout;
-import java.awt.GridBagLayout;
-import java.awt.GridBagConstraints;
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.ImageIcon;
+import java.awt.*;
+import javax.swing.*;
 
 import me.syberiak.cmdr.CMDR;
 
@@ -33,8 +25,25 @@ public class MMAboutDialog extends JDialog {
         JPanel textPanel = new JPanel(new GridBagLayout());
 
         JLabel authorLabel = new JLabel("Author: SyberiaK");
+        authorLabel.setFont(new Font(null, Font.BOLD, 12));
 
-        JLabel detailedLabel = new JLabel("Someday there will be a lot more info...");
+        JTextArea majorChangelog = new JTextArea(String.join("\n", CMDR.MAJOR_CHANGELOG));
+        majorChangelog.setWrapStyleWord(true);
+        majorChangelog.setLineWrap(true);
+        majorChangelog.setEditable(false);
+        majorChangelog.setFocusable(false);
+        majorChangelog.setBackground(UIManager.getColor("Label.background"));
+        majorChangelog.setFont(UIManager.getFont("Label.font"));
+        majorChangelog.setBorder(UIManager.getBorder("Label.border"));
+
+        JTextArea latestChangelog = new JTextArea(String.join("\n", CMDR.LATEST_CHANGELOG));
+        latestChangelog.setWrapStyleWord(true);
+        latestChangelog.setLineWrap(true);
+        latestChangelog.setEditable(false);
+        latestChangelog.setFocusable(false);
+        latestChangelog.setBackground(UIManager.getColor("Label.background"));
+        latestChangelog.setFont(UIManager.getFont("Label.font"));
+        latestChangelog.setBorder(UIManager.getBorder("Label.border"));
 
         JPanel buttonPanel = new JPanel(new GridBagLayout());
 
@@ -46,34 +55,34 @@ public class MMAboutDialog extends JDialog {
 
         closeButton.addActionListener(e -> this.dispose());
 
-        c.insets = new Insets(0, 0, 10, 0);
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.insets = new Insets(0, 30, 10, 30);
         c.gridx = 0;
-        c.gridy = GridBagConstraints.RELATIVE;
+        c.weightx = 1;
+        c.gridy = 0;
         textPanel.add(authorLabel, c);
 
         c.gridwidth = 2;
-        textPanel.add(detailedLabel, c);
+        c.gridy = 1;
+        textPanel.add(majorChangelog, c);
+        c.gridx = 2;
+        textPanel.add(latestChangelog, c);
 
-        c.fill = GridBagConstraints.HORIZONTAL;
-        c.ipady = 0;
-        c.weightx = 1;
-        c.weighty = 1;
+        c.insets = new Insets(10, 10, 10, 10);
         c.anchor = GridBagConstraints.LAST_LINE_END;
         c.gridx = GridBagConstraints.RELATIVE;
-        c.ipadx = 200;
+
+        c.ipadx = 300;
         buttonPanel.add(buttonMargin, c);
 
         c.ipadx = 0;
-        c.weightx = 0.5;
-        c.weighty = 0.5;
-        c.insets = new Insets(0, 0, 10, 10);
-        c.gridwidth = 1;
         buttonPanel.add(closeButton, c);
 
         this.add(textPanel, BorderLayout.CENTER);
         this.add(buttonPanel, BorderLayout.PAGE_END);
 
-        this.setBounds(150, 150, DIALOG_WIDTH, DIALOG_HEIGHT);
+        this.setBounds(ManagerMenu.WINDOW_POSITION_X, ManagerMenu.WINDOW_POSITION_Y,
+                       DIALOG_WIDTH, DIALOG_HEIGHT);
         this.setResizable(false);
         this.setVisible(true);
     }
