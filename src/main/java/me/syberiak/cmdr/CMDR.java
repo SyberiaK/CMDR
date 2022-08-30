@@ -2,6 +2,7 @@ package me.syberiak.cmdr;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -52,6 +53,11 @@ public class CMDR {
     }
 
     public static String SETTINGS_DIR;
+    static {
+        SETTINGS_DIR = OS.contains("win") ? System.getenv("LOCALAPPDATA") : CURRENT_USER_ROAMING;
+        SETTINGS_DIR += "/CMDR/settings.json";
+    }
+
     public static String MINECRAFT_PATH;
 
     static String PACK_DIR;
@@ -63,49 +69,30 @@ public class CMDR {
 
     static String logFileLocation;
     static {
-        if (OS.contains("win")) {
-            logFileLocation = System.getenv("LOCALAPPDATA");
-        } else {
-            logFileLocation = CURRENT_USER_ROAMING;
-        }
+        logFileLocation = OS.contains("win") ? System.getenv("LOCALAPPDATA") : CURRENT_USER_ROAMING;
         logFileLocation += "/CMDR/logs";
         System.setProperty("CMDR.logs", logFileLocation);
     }
     public static final Logger LOGGER = LoggerFactory.getLogger(CMDR.class);
 
-
     public static void main(String[] args) {
-
 
         try (InputStream musicDataStream = CMDR.class.getResourceAsStream("/csv/music-discs-data.csv")) {
             MUSIC_DATA = CSVReader.readDataFromCSV(musicDataStream, ",");
-        } catch (Exception e) {
-            LOGGER.error("Error occurred!", e);
-            throw new RuntimeException(e);
-        }
+        } catch (Exception e) { throwError(e); }
+
+        File settings_file = new File(SETTINGS_DIR);
 
         try {
-            File PROGRAM_FOLDER = new File(CMDR.class.getProtectionDomain().getCodeSource().getLocation()
-                    .toURI()).getParentFile();
-
-            SETTINGS_DIR = new File(PROGRAM_FOLDER + File.separator + "settings.json").getPath();
-            File settings_file = new File(SETTINGS_DIR);
-
             if (settings_file.createNewFile()) {
-                JSONObject settingsObject = new JSONObject();
-                settingsObject.put("pathToMinecraft", "<PATH HERE>");
-
-                try (FileWriter filewriter = new FileWriter(settings_file)) {
-                    filewriter.write(settingsObject.toString());
-                }
+                SettingsContainer settings = new SettingsContainer("<PATH HERE>");
+                Settings.editSettings(SETTINGS_DIR, settings);
             }
 
             getSettings();
-            initializeResourcePack();
-        } catch (Exception e) {
-            LOGGER.error("Error occurred!", e);
-            throw new RuntimeException(e);
-        }
+        } catch (Exception e) { throwError(e); }
+
+        initializeResourcePack();
 
         SwingUtilities.invokeLater(() -> {
             manager = new ManagerMenu();
@@ -125,30 +112,24 @@ public class CMDR {
         } catch (Exception e) { LOGGER.warn("Exception occurred!", e); }
     }
 
-    public static void getSettings() {
-        try {
-            SettingsContainer settings = Settings.readSettings(SETTINGS_DIR);
+    public static void getSettings() throws IOException {
+        SettingsContainer settings = Settings.readSettings(SETTINGS_DIR);
 
-            MINECRAFT_PATH = settings.getPathToMinecraft();
-            if (MINECRAFT_PATH.equals("<PATH HERE>")) {
-                if (!new File(DEFAULT_MINECRAFT_PATH).exists()) {
-                    DEFAULT_MINECRAFT_PATH = "<NOT DEFAULT>";
-                }
-                settings.setPathToMinecraft(DEFAULT_MINECRAFT_PATH);
-                Settings.editSettings(SETTINGS_DIR, settings);
-                MINECRAFT_PATH = settings.getPathToMinecraft();
+        MINECRAFT_PATH = settings.getPathToMinecraft();
+        if (MINECRAFT_PATH.equals("<PATH HERE>")) {
+            if (!new File(DEFAULT_MINECRAFT_PATH).exists()) {
+                DEFAULT_MINECRAFT_PATH = "<NOT DEFAULT>";
             }
-            PACK_DIR = MINECRAFT_PATH + String.join(File.separator,
-                    "", "resourcepacks", "CMDR", "");
-            RECORD_DIR = PACK_DIR + String.join(File.separator,
-                    "assets", "minecraft", "sounds", "records", "");
-            PACK_META_DIR = PACK_DIR + "pack.mcmeta";
-            PACK_ICON_DIR = PACK_DIR + "pack.png";
-
-        } catch (Exception e) {
-            LOGGER.error("Error occurred!", e);
-            throw new RuntimeException(e);
+            settings.setPathToMinecraft(DEFAULT_MINECRAFT_PATH);
+            Settings.editSettings(SETTINGS_DIR, settings);
+            MINECRAFT_PATH = settings.getPathToMinecraft();
         }
+        PACK_DIR = MINECRAFT_PATH + String.join(File.separator,
+                "", "resourcepacks", "CMDR", "");
+        RECORD_DIR = PACK_DIR + String.join(File.separator,
+                "assets", "minecraft", "sounds", "records", "");
+        PACK_META_DIR = PACK_DIR + "pack.mcmeta";
+        PACK_ICON_DIR = PACK_DIR + "pack.png";
     }
 
     public static boolean isMinecraftDirectory(Path path) {
@@ -183,7 +164,7 @@ public class CMDR {
                 filewriter.write(metaObject.toString());
                 LOGGER.info("RP's pack.mcmeta: generated successfully.");
             } catch (Exception e) {
-                LOGGER.error("RP's pack.mcmeta: failed generating.");
+                LOGGER.error("RP's pack.mcmeta: failed generating. Reason:", e);
             }
         }
 
@@ -197,8 +178,13 @@ public class CMDR {
                 Files.copy(iconStream, pack_icon.toPath());
                 LOGGER.info("RP's pack icon: generated successfully.");
             } catch (Exception e) {
-                LOGGER.error("RP's pack icon: failed generating.");
+                LOGGER.error("RP's pack icon: failed generating. Reason:", e);
             }
         }
+    }
+
+    public static void throwError(Exception e) {
+        LOGGER.error("Error occurred!", e);
+        throw new RuntimeException(e);
     }
 }

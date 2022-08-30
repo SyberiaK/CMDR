@@ -11,7 +11,7 @@ public class Settings {
         return new ObjectMapper().readValue(new File(source), SettingsContainer.class);
     }
 
-    public static void editSettings(String source, SettingsContainer newSettings) throws IOException {
-        new ObjectMapper().writeValue(new File(source), newSettings);
+    public static void editSettings(String source, SettingsContainer settings) throws IOException {
+        new ObjectMapper().writeValue(new File(source), settings);
     }
 }
