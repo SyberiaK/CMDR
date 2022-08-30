@@ -45,7 +45,7 @@ public class ManagerMenu extends JFrame {
                 try {
                     UIManager.setLookAndFeel(platform);
                 } catch (Exception e) {
-                    CMDR.LOGGER.error("Exception occurred!", e);
+                    CMDR.LOGGER.warn("Exception occurred!", e);
                 }
             }
         }
@@ -134,8 +134,7 @@ public class ManagerMenu extends JFrame {
         if (recordFile.exists()) {
             if (recordFile.delete()) {
                 CMDR.LOGGER.info(record + ": returned default record successfully.");
-            }
-            else {
+            } else {
                 CMDR.LOGGER.error(record + ": failed to return default record.");
             }
         }

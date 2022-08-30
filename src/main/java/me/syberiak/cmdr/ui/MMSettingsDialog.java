@@ -45,7 +45,7 @@ public class MMSettingsDialog extends JDialog  {
 
         JLabel pathToMinecraftLabel = new JLabel("Minecraft directory:");
         JTextField pathToMinecraftTextField = new JTextField();
-        pathToMinecraftTextField.setToolTipText(String.format("Path to Minecraft directory (default is %s)",
+        pathToMinecraftTextField.setToolTipText(String.format("Path to Minecraft directory (default: %s)",
                 CMDR.DEFAULT_MINECRAFT_PATH));
         pathToMinecraftTextField.setText(CMDR.MINECRAFT_PATH);
         pathToMinecraftTextField.setPreferredSize(new Dimension(300, 25));
@@ -98,10 +98,7 @@ public class MMSettingsDialog extends JDialog  {
                 }
                 Settings.editSettings(CMDR.SETTINGS_DIR, settings);
                 CMDR.getSettings();
-            } catch (Exception e) {
-                CMDR.LOGGER.error("Error occurred!", e);
-                throw new RuntimeException(e);
-            }
+            } catch (Exception e) { CMDR.throwError(e); }
         });
 
         closeButton.addActionListener(e -> this.dispatchEvent(
@@ -156,10 +153,7 @@ public class MMSettingsDialog extends JDialog  {
                     } else {
                         window.dispose();
                     }
-                } catch (Exception e) {
-                    CMDR.LOGGER.error("Error occurred!", e);
-                    throw new RuntimeException(e);
-                }
+                } catch (Exception e) { CMDR.throwError(e); }
             }
         });
         this.setResizable(false);
