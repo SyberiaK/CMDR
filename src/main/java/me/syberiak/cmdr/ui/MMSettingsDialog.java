@@ -98,6 +98,7 @@ public class MMSettingsDialog extends JDialog  {
                 }
                 Settings.editSettings(CMDR.SETTINGS_DIR, settings);
                 CMDR.getSettings();
+                CMDR.initializeResourcePack();
             } catch (Exception e) { CMDR.throwError(e); }
         });
 
