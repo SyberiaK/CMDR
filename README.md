@@ -4,9 +4,9 @@
 
 ## Setting up
 
-At first launch of the application check "Minecraft directory path" in the settings. If it incorrect - change to valid path.
+At first launch of the application check "Minecraft directory path" in the settings. If it's incorrect - change to valid path.
 
-Also don't forget to enable a *"CMDR_RP"* resource pack in the game so changes will be applied.
+Also don't forget to enable the *"CMDR_RP"* resource pack in the game so the changes will be applied.
 
 ## License
 
