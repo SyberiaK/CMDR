@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.net.URL;
 import java.util.List;
+import java.util.Locale;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
@@ -21,71 +22,77 @@ import me.syberiak.cmdr.util.CSVReader;
 
 public class CMDR {
 
-    public static String VERSION = "0.2.1";
+    public static final String VERSION = "0.2.1";
+    public static final String VERSION_V = "v" + VERSION;
 
     public static final String[] MAJOR_CHANGELOG = {"Major changelog (0.1.0):",
                                                     "- Added logging",
                                                     "- System look and feel",
                                                     "- MacOS and Linux support (not tested)",
                                                     "- Code improvements",
-                                                    "- Exception notifs improvements",
+                                                    "- Exception notifications improvements",
                                                     "- OGG audio support"};
     public static final String[] LATEST_CHANGELOG = {"Latest changelog:",
-                                                     "- Java 8 support",
-                                                     "- RP generating after changing path to Minecraft directory"};
+                                                     "- Fixed CSVReader unable to parse non-ASCII characters",
+                                                     "- Fixed typo in Samuel Åberg's name",
+                                                     "- Various fixes for MacOS and Unix",
+                                                     "- App crashes if using other OS than Windows, MacOS or Unix"};
 
     public static final URL ICON_URL = CMDR.class.getResource("/icon.png");
     public static List<String[]> MUSIC_DATA;
 
-    public static final String OS = System.getProperty("os.name").toLowerCase();
-    public static String CURRENT_USER_ROAMING;
-    static {
-        CURRENT_USER_ROAMING = System.getProperty("user.home");
+    // Define OS
+    public static final String OS = System.getProperty("os.name").toLowerCase(Locale.ENGLISH);
+    public static final boolean IS_WINDOWS = OS.contains("windows");
+    public static final boolean IS_MAC = OS.contains("mac") || OS.contains("darwin");
 
-        if (OS.contains("mac") || OS.contains("darwin")) {
-            CURRENT_USER_ROAMING += "/Library/Application Support";
-        } else if (OS.contains("win")) {
-            CURRENT_USER_ROAMING = System.getenv("APPDATA");
-        }
-    }
-    public static String DEFAULT_MINECRAFT_PATH;
-    static {
-        DEFAULT_MINECRAFT_PATH = CURRENT_USER_ROAMING + File.separator;
-        if (OS.contains("mac")) {
-            DEFAULT_MINECRAFT_PATH += "minecraft";
-        } else {
-            DEFAULT_MINECRAFT_PATH += ".minecraft";
-        }
+    public static final boolean IS_UNIX = OS.contains("nix") || OS.contains("nux") || OS.contains("aix");
+
+    public static final String CURRENT_USER_ROAMING = defineAppDataDir();
+    static String defineAppDataDir() {
+        if (IS_UNIX) return System.getProperty("user.home");
+
+        if (IS_MAC) return System.getProperty("user.home") + "/Library/Application Support";
+
+        if (IS_WINDOWS) return System.getenv("APPDATA");
+
+        throwError(new Exception("Unsupported platform: " + OS));
+        return "";
     }
 
-    public static String SETTINGS_DIR;
+
+    public static final String[] SUPPORTED_LAUNCHERS = {"Vanilla",
+                                                        "Prism"};
+
+    // Define default Minecraft directory
+    public static String DEFAULT_MINECRAFT_PATH = CURRENT_USER_ROAMING + (IS_MAC ? "/minecraft" : "/.minecraft");
+    // Currently Windows-only
+    public static String DEFAULT_PRISM_PATH = System.getenv("LOCALAPPDATA") + "/Programs/PrismLauncher";
+
+    // Define settings and logs directories
+    public static final String SETTINGS_DIR;
     static {
-        SETTINGS_DIR = OS.contains("win") ? System.getenv("LOCALAPPDATA") : CURRENT_USER_ROAMING;
-        SETTINGS_DIR += "/CMDR/settings.json";
+        String LOCALAPPDATA = IS_WINDOWS ? System.getenv("LOCALAPPDATA") : CURRENT_USER_ROAMING;
+
+        SETTINGS_DIR = LOCALAPPDATA + "/CMDR/settings.json";
+        System.setProperty("CMDR.logsDir", LOCALAPPDATA + "/CMDR/logs");
     }
 
+    // Define RP directory
     public static String MINECRAFT_PATH;
-
-    static String PACK_DIR;
+    private static String PACK_DIR;
     public static String RECORD_DIR;
-    static String PACK_META_DIR;
-    static String PACK_ICON_DIR;
 
     public static ManagerMenu manager;
 
-    static String logFileLocation;
-    static {
-        logFileLocation = OS.contains("win") ? System.getenv("LOCALAPPDATA") : CURRENT_USER_ROAMING;
-        logFileLocation += "/CMDR/logs";
-        System.setProperty("CMDR.logs", logFileLocation);
-    }
     public static final Logger LOGGER = LoggerFactory.getLogger(CMDR.class);
 
     public static void main(String[] args) {
-
         try (InputStream musicDataStream = CMDR.class.getResourceAsStream("/csv/music-discs-data.csv")) {
             MUSIC_DATA = CSVReader.readDataFromCSV(musicDataStream, ",");
-        } catch (Exception e) { throwError(e); }
+        } catch (Exception e) {
+            throwError(e);
+        }
 
         File settings_file = new File(SETTINGS_DIR);
 
@@ -95,8 +102,10 @@ public class CMDR {
                 Settings.editSettings(SETTINGS_DIR, settings);
             }
 
-            getSettings();
-        } catch (Exception e) { throwError(e); }
+            updateSettings();
+        } catch (Exception e) {
+            throwError(e);
+        }
 
         initializeResourcePack();
 
@@ -106,7 +115,7 @@ public class CMDR {
         });
 
         try {
-            if (Settings.readSettings(SETTINGS_DIR).getPathToMinecraft().equals("<NOT DEFAULT>")) {
+            if (MINECRAFT_PATH.equals("<NOT DEFAULT>")) {
                 LOGGER.warn("CMDR cannot find the Minecraft directory. " +
                         "Please set the path to the game directory manually in settings.");
                 JOptionPane.showMessageDialog(manager,
@@ -115,10 +124,12 @@ public class CMDR {
                         "CMDR Manager", JOptionPane.WARNING_MESSAGE);
             }
             LOGGER.info("Launched successfully.");
-        } catch (Exception e) { LOGGER.warn("Exception occurred!", e); }
+        } catch (Exception e) {
+            LOGGER.warn("Exception occurred!", e);
+        }
     }
 
-    public static void getSettings() throws IOException {
+    public static void updateSettings() throws IOException {
         SettingsContainer settings = Settings.readSettings(SETTINGS_DIR);
 
         MINECRAFT_PATH = settings.getPathToMinecraft();
@@ -130,16 +141,18 @@ public class CMDR {
             Settings.editSettings(SETTINGS_DIR, settings);
             MINECRAFT_PATH = settings.getPathToMinecraft();
         }
-        PACK_DIR = MINECRAFT_PATH + String.join(File.separator,
-                "", "resourcepacks", "CMDR", "");
-        RECORD_DIR = PACK_DIR + String.join(File.separator,
-                "assets", "minecraft", "sounds", "records", "");
-        PACK_META_DIR = PACK_DIR + "pack.mcmeta";
-        PACK_ICON_DIR = PACK_DIR + "pack.png";
+        PACK_DIR = MINECRAFT_PATH + "/resourcepacks/CMDR/";
+        RECORD_DIR = PACK_DIR + "assets/minecraft/sounds/records/";
+    }
+
+    public static void editAndUpdateSettings(SettingsContainer settings) throws IOException {
+        Settings.editSettings(SETTINGS_DIR, settings);
+
+        updateSettings();
     }
 
     public static boolean isMinecraftDirectory(Path path) {
-        return new File(path + File.separator + "resourcepacks").exists();
+        return new File(path + "/resourcepacks").exists();
     }
 
     public static void initializeResourcePack() {
@@ -154,13 +167,13 @@ public class CMDR {
             }
         }
 
-        File pack_meta = new File(PACK_META_DIR);
+        File pack_meta = new File(PACK_DIR + "pack.mcmeta");
 
         if (!pack_meta.exists()) {
             LOGGER.info("Can't find RP's pack.mcmeta, generating new one...");
 
             JSONObject packObject = new JSONObject();
-            packObject.put("pack_format", 8);
+            packObject.put("pack_format", 9);
             packObject.put("description", "Autogenerated resource pack. (Ignore incompatibility message)");
 
             JSONObject metaObject = new JSONObject();
@@ -174,7 +187,7 @@ public class CMDR {
             }
         }
 
-        File pack_icon = new File(PACK_ICON_DIR);
+        File pack_icon = new File(PACK_DIR + "pack.png");
 
         if (!pack_icon.exists()) {
             LOGGER.info("Can't find RP's pack icon, generating new one...");
