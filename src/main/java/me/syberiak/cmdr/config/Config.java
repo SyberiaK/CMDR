@@ -7,13 +7,15 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Path;
+import java.util.Locale;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import me.syberiak.cmdr.CMDR;
 
 public class Config extends ConfigWrapper {
-    // Config fields
+    // Config object fields
     public AppConfig appConfig;
     public Bindings bindings;
 
@@ -22,36 +24,65 @@ public class Config extends ConfigWrapper {
         bindings = new Bindings();
     }
 
-    public static class AppConfig {
-        public String lang;
+    public String getLanguage() {
+        return appConfig.lang;
+    }
 
-        public AppConfig() {
-            lang = "en-US";
+    public String getVanillaPath() {
+        return bindings.vanilla.path;
+    }
+
+    public void setVanillaPath(Path path) {
+        setVanillaPath(path.toString());
+    }
+
+    public void setVanillaPath(String path) {
+        bindings.vanilla.path = path;
+    }
+
+    public String getPrismPath() {
+        return bindings.prism.path;
+    }
+
+    public void setPrismPath(String path) {
+        bindings.vanilla.path = path;
+    }
+
+    public String[] getPrismInstances() {
+        return bindings.prism.instances;
+    }
+
+    // Container classes
+    static class AppConfig {
+        String lang;
+
+        AppConfig() {
+            lang = Locale.getDefault().toString();
         }
     }
 
-    public static class Bindings {
-        public VanillaBindings vanilla;
-        public PrismBindings prism;
+    static class Bindings {
+        VanillaBindings vanilla;
+        PrismBindings prism;
 
-        public Bindings() {
+        Bindings() {
             vanilla = new VanillaBindings();
             prism = new PrismBindings();
         }
 
-        public static class VanillaBindings {
-            public String path;
+        static class VanillaBindings {
+            String path;
 
-            public VanillaBindings() {
+            VanillaBindings() {
                 path = CMDR.DEFAULT_MINECRAFT_PATH;
             }
         }
 
-        public static class PrismBindings {
-            public String path;
-            public String[] instances;
+        static class PrismBindings {
+            String path;
+            String[] instances;
 
-            public PrismBindings() {
+            PrismBindings() {
                 path = CMDR.DEFAULT_MINECRAFT_PATH;
                 instances = CMDR.parsePrismInstances();
             }
