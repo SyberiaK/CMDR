@@ -2,21 +2,22 @@ package me.syberiak.cmdr;
 
 import java.io.File;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.net.URL;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Stream;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
+import me.syberiak.cmdr.rp.ResourcePack;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import me.syberiak.cmdr.settings.*;
+import me.syberiak.cmdr.config.Config;
 import me.syberiak.cmdr.ui.ManagerMenu;
 import me.syberiak.cmdr.util.CSVReader;
 
@@ -67,19 +68,16 @@ public class CMDR {
     // Define default Minecraft directory
     public static String DEFAULT_MINECRAFT_PATH = CURRENT_USER_ROAMING + (IS_MAC ? "/minecraft" : "/.minecraft");
     // Currently Windows-only
-    public static String DEFAULT_PRISM_PATH = System.getenv("LOCALAPPDATA") + "/Programs/PrismLauncher";
+    public static String DEFAULT_PRISM_PATH = CURRENT_USER_ROAMING + "/PrismLauncher";
 
     // Define settings and logs directories
-    public static final String SETTINGS_DIR;
+    public static String APPDATA_DIR = IS_WINDOWS ? System.getenv("LOCALAPPDATA") : CURRENT_USER_ROAMING;
+    public static final String SETTINGS_DIR = APPDATA_DIR + "/CMDR/config.json";
     static {
-        String LOCALAPPDATA = IS_WINDOWS ? System.getenv("LOCALAPPDATA") : CURRENT_USER_ROAMING;
-
-        SETTINGS_DIR = LOCALAPPDATA + "/CMDR/settings.json";
-        System.setProperty("CMDR.logsDir", LOCALAPPDATA + "/CMDR/logs");
+        System.setProperty("CMDR.logsDir", APPDATA_DIR + "/CMDR/logs");
     }
 
     // Define RP directory
-    public static String MINECRAFT_PATH;
     private static String PACK_DIR;
     public static String RECORD_DIR;
 
@@ -94,64 +92,50 @@ public class CMDR {
             throwError(e);
         }
 
-        File settings_file = new File(SETTINGS_DIR);
+        Config.load(SETTINGS_DIR);
+        syncWithConfig();
+        Config config = Config.getInstance();
 
-        try {
-            if (settings_file.createNewFile()) {
-                SettingsContainer settings = new SettingsContainer("<PATH HERE>");
-                Settings.editSettings(SETTINGS_DIR, settings);
-            }
-
-            updateSettings();
-        } catch (Exception e) {
-            throwError(e);
+        if (config.getVanillaPath().equals("<UNDEFINED>")) {
+            LOGGER.warn("CMDR cannot find the Minecraft directory. " +
+                    "Please set the path to the game directory manually in settings.");
+            JOptionPane.showMessageDialog(manager,
+                    "CMDR cannot find the Minecraft directory.\n" +
+                            "Please set the path to the game directory manually in settings.",
+                    "CMDR Manager", JOptionPane.WARNING_MESSAGE);
         }
 
-        initializeResourcePack();
+        ResourcePack.initialize(config.getVanillaPath());
 
         SwingUtilities.invokeLater(() -> {
             manager = new ManagerMenu();
             manager.setVisible(true);
         });
 
-        try {
-            if (MINECRAFT_PATH.equals("<NOT DEFAULT>")) {
-                LOGGER.warn("CMDR cannot find the Minecraft directory. " +
-                        "Please set the path to the game directory manually in settings.");
-                JOptionPane.showMessageDialog(manager,
-                        "CMDR cannot find the Minecraft directory.\n" +
-                                "Please set the path to the game directory manually in settings.",
-                        "CMDR Manager", JOptionPane.WARNING_MESSAGE);
-            }
-            LOGGER.info("Launched successfully.");
-        } catch (Exception e) {
-            LOGGER.warn("Exception occurred!", e);
+        LOGGER.info("Launched successfully.");
+    }
+
+    public static void validateConfig() {
+        Config config = Config.getInstance();
+
+        if (!new File(config.getVanillaPath()).exists()) {
+            config.setVanillaPath("<UNDEFINED>");
+        }
+        if (!new File(config.getPrismPath()).exists()) {
+            config.setPrismPath("<UNDEFINED>");
         }
     }
 
-    public static void updateSettings() throws IOException {
-        SettingsContainer settings = Settings.readSettings(SETTINGS_DIR);
+    public static void syncWithConfig() {
+        validateConfig();
 
-        MINECRAFT_PATH = settings.getPathToMinecraft();
-        if (MINECRAFT_PATH.equals("<PATH HERE>")) {
-            if (!new File(DEFAULT_MINECRAFT_PATH).exists()) {
-                DEFAULT_MINECRAFT_PATH = "<NOT DEFAULT>";
-            }
-            settings.setPathToMinecraft(DEFAULT_MINECRAFT_PATH);
-            Settings.editSettings(SETTINGS_DIR, settings);
-            MINECRAFT_PATH = settings.getPathToMinecraft();
-        }
-        PACK_DIR = MINECRAFT_PATH + "/resourcepacks/CMDR/";
-        RECORD_DIR = PACK_DIR + "assets/minecraft/sounds/records/";
+        Config config = Config.getInstance();
+
+        PACK_DIR = config.getVanillaPath() + "/resourcepacks/CMDR";
+        RECORD_DIR = PACK_DIR + "/assets/minecraft/sounds/records";
     }
 
-    public static void editAndUpdateSettings(SettingsContainer settings) throws IOException {
-        Settings.editSettings(SETTINGS_DIR, settings);
-
-        updateSettings();
-    }
-
-    public static boolean isMinecraftDirectory(Path path) {
+    public static boolean isMinecraftDirectory(String path) {
         return new File(path + "/resourcepacks").exists();
     }
 
@@ -167,7 +151,7 @@ public class CMDR {
             }
         }
 
-        File pack_meta = new File(PACK_DIR + "pack.mcmeta");
+        File pack_meta = new File(PACK_DIR + "/pack.mcmeta");
 
         if (!pack_meta.exists()) {
             LOGGER.info("Can't find RP's pack.mcmeta, generating new one...");
@@ -187,7 +171,7 @@ public class CMDR {
             }
         }
 
-        File pack_icon = new File(PACK_DIR + "pack.png");
+        File pack_icon = new File(PACK_DIR + "/pack.png");
 
         if (!pack_icon.exists()) {
             LOGGER.info("Can't find RP's pack icon, generating new one...");
@@ -200,6 +184,20 @@ public class CMDR {
                 LOGGER.error("RP's pack icon: failed generating. Reason:", e);
             }
         }
+    }
+
+    public static String[] parsePrismInstances() {
+        String prismPath = Config.getInstance().getPrismPath();
+
+        try (Stream<Path> instancesPaths = Files.find(Paths.get(prismPath + "/instances"),
+                1,
+                (path, attr) -> Files.isDirectory(path) &&
+                        !path.toString().equals(".LAUNCHER_TEMP"))) {
+            return instancesPaths.map(path -> path.getFileName().toString()).toArray(String[]::new);
+        } catch (Exception e) {
+            LOGGER.error("Failed parsing Prism instances:", e);
+        }
+        return new String[0];
     }
 
     public static void throwError(Exception e) {
