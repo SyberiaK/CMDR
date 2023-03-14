@@ -1,4 +1,7 @@
-package me.syberiak.cmdr.ui;
+package me.syberiak.cmdr.ui.component;
+
+import me.syberiak.cmdr.ui.ReworkedMMAboutDialog;
+import me.syberiak.cmdr.ui.MMSettingsDialog;
 
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -12,11 +15,11 @@ public class MMMenuBar extends JMenuBar {
         JMenuItem aboutItem = new JMenuItem("About");
 
         settingsItem.addActionListener(e -> new MMSettingsDialog());
-        aboutItem.addActionListener(e -> new MMAboutDialog());
+        aboutItem.addActionListener(e -> new ReworkedMMAboutDialog());
 
         menu.add(settingsItem);
         menu.add(aboutItem);
 
-        this.add(menu);
+        add(menu);
     }
 }
