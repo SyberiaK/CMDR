@@ -6,8 +6,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 import java.util.stream.Stream;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
@@ -64,9 +63,11 @@ public class CMDR {
                                                         "Prism"};
 
     // Define default Minecraft directory
-    public static String DEFAULT_MINECRAFT_PATH = CURRENT_USER_ROAMING + (IS_MAC ? "/minecraft" : "/.minecraft");
-    // Currently Windows-only
-    public static String DEFAULT_PRISM_PATH = CURRENT_USER_ROAMING + "/PrismLauncher";
+    // Transforming to path and back to string to normalize the path
+    public static String DEFAULT_MINECRAFT_PATH =
+            Paths.get(CURRENT_USER_ROAMING + (IS_MAC ? "/minecraft" : "/.minecraft")).toString();
+    // Prism - currently Windows-only
+    public static String DEFAULT_PRISM_PATH = Paths.get(CURRENT_USER_ROAMING + "/PrismLauncher").toString();
 
     // Define settings and logs directories
     public static String APPDATA_DIR = IS_WINDOWS ? System.getenv("LOCALAPPDATA") : CURRENT_USER_ROAMING;
@@ -100,14 +101,16 @@ public class CMDR {
                     "CMDR cannot find the Minecraft directory.\n" +
                             "Please set the path to the game directory manually in settings.",
                     "CMDR Manager", JOptionPane.WARNING_MESSAGE);
+        } else {
+            ResourcePack.initialize(config.getVanillaPath());
         }
-
-        ResourcePack.initialize(config.getVanillaPath());
 
         SwingUtilities.invokeLater(() -> {
             manager = new ManagerMenu();
             manager.setVisible(true);
         });
+
+        config.toFile(SETTINGS_DIR);
 
         LOGGER.info("Launched successfully.");
     }
@@ -121,6 +124,11 @@ public class CMDR {
         if (!new File(config.getPrismPath()).exists()) {
             config.setPrismPath("<UNDEFINED>");
         }
+        Set<String> recordedInstances = new HashSet<>(Arrays.asList(config.getPrismInstances()));
+        Set<String> instances = new HashSet<>(Arrays.asList(parsePrismInstances()));
+        instances.retainAll(recordedInstances);
+
+        config.setPrismInstances(instances.toArray(new String[0]));
     }
 
     public static void syncWithConfig() {
@@ -133,14 +141,25 @@ public class CMDR {
         return new File(path + "/resourcepacks").exists();
     }
 
+    public static boolean isPrismDirectory(String path) {
+        boolean assetsExist = new File(path + "/assets").exists();
+        boolean cfgExist = new File(path + "/prismlauncher.cfg").exists();
+        boolean instancesExist = new File(path + "/instances").exists();
+
+        return assetsExist && cfgExist && instancesExist;
+    }
+
     public static String[] parsePrismInstances() {
         String prismPath = Config.getInstance().getPrismPath();
+        Path instancesDir = Paths.get(prismPath + "/instances");
 
-        try (Stream<Path> instancesPaths = Files.find(Paths.get(prismPath + "/instances"),
-                1,
-                (path, attr) -> Files.isDirectory(path) &&
-                        !path.toString().equals(".LAUNCHER_TEMP"))) {
-            return instancesPaths.map(path -> path.getFileName().toString()).toArray(String[]::new);
+        try (Stream<Path> instancesPaths = Files.walk(instancesDir, 1)
+                .filter(
+                        p -> Files.isDirectory(p) &&
+                                !p.equals(instancesDir) &&
+                                !p.getFileName().toString().equals(".LAUNCHER_TEMP")
+                )) {
+            return instancesPaths.map(p -> p.getFileName().toString()).toArray(String[]::new);
         } catch (Exception e) {
             LOGGER.error("Failed parsing Prism instances:", e);
         }
