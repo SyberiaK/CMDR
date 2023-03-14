@@ -13,21 +13,28 @@ import java.util.Locale;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import me.syberiak.cmdr.CMDR;
+import me.syberiak.cmdr.rp.Launcher;
 
 public class Config extends ConfigWrapper {
     // Config object fields
-    public AppConfig appConfig;
-    public Bindings bindings;
+    AppConfig app;
+    Bindings bindings;
 
     public Config() {
-        appConfig = new AppConfig();
+        app = new AppConfig();
         bindings = new Bindings();
     }
 
     public String getLanguage() {
-        return appConfig.lang;
+        return app.lang;
+    }
+    public Launcher getSelectedLauncher() {
+        return Launcher.findLauncherByID(bindings.selectedLauncher);
     }
 
+    public void selectLauncher(Launcher launcher) {
+        bindings.selectedLauncher = launcher.id;
+    }
     public String getVanillaPath() {
         return bindings.vanilla.path;
     }
@@ -51,21 +58,27 @@ public class Config extends ConfigWrapper {
     public String[] getPrismInstances() {
         return bindings.prism.instances;
     }
+    public void setPrismInstances(String[] instances) {
+        bindings.prism.instances = instances;
+    }
 
     // Container classes
     static class AppConfig {
         String lang;
 
         AppConfig() {
-            lang = Locale.getDefault().toString();
+            lang = Locale.getDefault().toLanguageTag();
         }
     }
 
     static class Bindings {
+
+        String selectedLauncher;
         VanillaBindings vanilla;
         PrismBindings prism;
 
         Bindings() {
+            selectedLauncher = Launcher.Vanilla.id;
             vanilla = new VanillaBindings();
             prism = new PrismBindings();
         }
@@ -83,8 +96,8 @@ public class Config extends ConfigWrapper {
             String[] instances;
 
             PrismBindings() {
-                path = CMDR.DEFAULT_MINECRAFT_PATH;
-                instances = CMDR.parsePrismInstances();
+                path = CMDR.DEFAULT_PRISM_PATH;
+                instances = new String[0];
             }
         }
     }
