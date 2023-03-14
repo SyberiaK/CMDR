@@ -3,6 +3,7 @@ package me.syberiak.cmdr.util;
 import java.io.File;
 import java.util.Arrays;
 
+import org.apache.commons.io.FilenameUtils;
 import ws.schild.jave.Encoder;
 import ws.schild.jave.EncoderException;
 import ws.schild.jave.MultimediaObject;
@@ -11,6 +12,7 @@ import ws.schild.jave.encode.EncodingAttributes;
 
 public class OGGAudioConverter implements Runnable {
 
+    static String[] SUPPORTED_FORMATS = {"mp3", "wav", "ogg"};
     String source;
     String target;
 
@@ -42,10 +44,8 @@ public class OGGAudioConverter implements Runnable {
     }
 
     public static void convert(String source, String target) throws Exception {
-        String[] formats = {"mp3", "wav", "ogg"};
-
-        boolean isCorrectFormat = Arrays.asList(formats).contains(
-                source.substring(source.lastIndexOf('.') + 1));
+        boolean isCorrectFormat = Arrays.asList(SUPPORTED_FORMATS)
+                .contains(FilenameUtils.getExtension(source));
 
         if (!isCorrectFormat) {
             throw new Exception(String.format("Wrong source file extension of %s" +
