@@ -1,6 +1,11 @@
 package me.syberiak.cmdr.ui;
 
-import java.awt.*;
+import java.awt.Font;
+import java.awt.Insets;
+import java.awt.Dimension;
+import java.awt.BorderLayout;
+import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
 import javax.swing.*;
 
 import me.syberiak.cmdr.CMDR;
@@ -18,7 +23,7 @@ public class MMAboutDialog extends JDialog {
             this.setIconImage(discImageIcon.getImage());
         }
 
-        this.setLayout(new BorderLayout());
+        setLayout(new BorderLayout());
 
         GridBagConstraints c = new GridBagConstraints();
 
@@ -78,12 +83,12 @@ public class MMAboutDialog extends JDialog {
         c.ipadx = 0;
         buttonPanel.add(closeButton, c);
 
-        this.add(textPanel, BorderLayout.CENTER);
-        this.add(buttonPanel, BorderLayout.PAGE_END);
+        add(textPanel, BorderLayout.CENTER);
+        add(buttonPanel, BorderLayout.PAGE_END);
 
-        this.setBounds(ManagerMenu.WINDOW_POSITION_X, ManagerMenu.WINDOW_POSITION_Y,
-                       DIALOG_WIDTH, DIALOG_HEIGHT);
-        this.setResizable(false);
-        this.setVisible(true);
+        setLocation(ManagerMenu.WINDOW_POSITION);
+        setSize(DIALOG_WIDTH, DIALOG_HEIGHT);
+        setResizable(false);
+        setVisible(true);
     }
 }
