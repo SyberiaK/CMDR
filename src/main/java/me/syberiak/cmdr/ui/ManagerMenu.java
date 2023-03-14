@@ -1,13 +1,7 @@
 package me.syberiak.cmdr.ui;
 
+import java.awt.*;
 import java.io.File;
-import java.awt.Font;
-import java.awt.Insets;
-import java.awt.Dimension;
-import java.awt.GridLayout;
-import java.awt.BorderLayout;
-import java.awt.GridBagLayout;
-import java.awt.GridBagConstraints;
 import java.net.URL;
 import java.util.List;
 import javax.swing.JFrame;
@@ -21,25 +15,31 @@ import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import me.syberiak.cmdr.CMDR;
+import me.syberiak.cmdr.ui.component.MMDiscButton;
+import me.syberiak.cmdr.ui.component.MMMenuBar;
 import me.syberiak.cmdr.util.OGGAudioConverter;
 
 public class ManagerMenu extends JFrame {
 
-    static final int FRAME_WIDTH = 640;
-    static final int FRAME_HEIGHT = 500;
+    static final Dimension WINDOW_SIZE = new Dimension(640, 500);
+    static final Point WINDOW_POSITION = new Point(150, 150);
 
-    public static final int WINDOW_POSITION_X = 150;
-    public static final int WINDOW_POSITION_Y = 150;
     JLabel discLabel;
     JLabel statusBar;
 
-    ImageIcon defaultDiscIcon;
+    public ImageIcon defaultDiscIcon;
 
     public ManagerMenu() {
-        this.setTitle("CMDR Manager");
-        this.setLayout(new BorderLayout());
+        setTitle("CMDR Manager");
+        setLayout(new BorderLayout());
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocation(WINDOW_POSITION);
+        setSize(WINDOW_SIZE);
+        setResizable(false);
+
         if (CMDR.ICON_URL != null) {
             defaultDiscIcon = new ImageIcon(CMDR.ICON_URL);
+            setIconImage(defaultDiscIcon.getImage());
         }
 
         if (UIManager.getLookAndFeel().isSupportedLookAndFeel()) {
@@ -53,6 +53,10 @@ public class ManagerMenu extends JFrame {
             }
         }
 
+        createUIComponents();
+    }
+
+    void createUIComponents() {
         MMMenuBar menuBar = new MMMenuBar();
 
         JPanel buttonsPanel = new JPanel(new GridLayout(0, 2));
@@ -77,7 +81,7 @@ public class ManagerMenu extends JFrame {
         GridBagConstraints c = new GridBagConstraints();
         labelsPanel.setPreferredSize(new Dimension(200, 100));
 
-        JLabel appName = new JLabel("CMDR v" + CMDR.VERSION);
+        JLabel appName = new JLabel("CMDR " + CMDR.VERSION_V);
         appName.setFont(new Font(null, Font.BOLD, 20));
         JTextArea appChangelog = new JTextArea(String.join("\n", CMDR.LATEST_CHANGELOG));
         appChangelog.setWrapStyleWord(true);
@@ -87,7 +91,7 @@ public class ManagerMenu extends JFrame {
         appChangelog.setBackground(UIManager.getColor("Label.background"));
         appChangelog.setFont(UIManager.getFont("Label.font"));
         appChangelog.setBorder(UIManager.getBorder("Label.border"));
-        
+
         discLabel = new JLabel("Choose music disc...");
         discLabel.setIcon(defaultDiscIcon);
         discLabel.setHorizontalTextPosition(JLabel.CENTER);
@@ -108,7 +112,7 @@ public class ManagerMenu extends JFrame {
         c.insets = new Insets(10, 2, 5, 2);
         c.anchor = GridBagConstraints.CENTER;
         labelsPanel.add(appChangelog, c);
-        
+
         c.insets = new Insets(20, 0, 0, 10);
         labelsPanel.add(discLabel, c);
 
@@ -116,17 +120,12 @@ public class ManagerMenu extends JFrame {
         c.insets = new Insets(75, 2, 5, 0);
         labelsPanel.add(statusBar, c);
 
-        this.setJMenuBar(menuBar);
-        this.add(buttonsPanel, BorderLayout.LINE_START);
-        this.add(labelsPanel, BorderLayout.LINE_END);
-
-        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.setIconImage(defaultDiscIcon.getImage());
-        this.setResizable(false);
-        this.setBounds(WINDOW_POSITION_X, WINDOW_POSITION_Y, FRAME_WIDTH, FRAME_HEIGHT);
+        setJMenuBar(menuBar);
+        add(buttonsPanel, BorderLayout.LINE_START);
+        add(labelsPanel, BorderLayout.LINE_END);
     }
     
-    void changeDiscLabel(ImageIcon icon, String discFullName) {
+    public void changeDiscLabel(ImageIcon icon, String discFullName) {
         discLabel.setIcon(icon);
         discLabel.setText(discFullName);
     }
