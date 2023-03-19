@@ -2,10 +2,11 @@ package me.syberiak.cmdr.ui;
 
 import javax.swing.*;
 import java.awt.event.*;
+import java.util.Arrays;
 
 import me.syberiak.cmdr.CMDR;
 import me.syberiak.cmdr.config.Config;
-import me.syberiak.cmdr.rp.Launcher;
+import me.syberiak.cmdr.config.Launcher;
 import me.syberiak.cmdr.ui.settings.PrismSettingsForm;
 import me.syberiak.cmdr.ui.settings.SettingsForm;
 import me.syberiak.cmdr.ui.settings.VanillaSettingsForm;
@@ -110,7 +111,8 @@ public class MMSettingsDialog extends JDialog {
         }
         setTitle("CMDR Manager");
 
-        selectLauncherComboBox = new JComboBox<>(CMDR.SUPPORTED_LAUNCHERS);
+        String[] launchers = Arrays.stream(Launcher.values()).map(Launcher::name).toArray(String[]::new);
+        selectLauncherComboBox = new JComboBox<>(launchers);
         selectLauncherComboBox.setFocusable(false);
     }
 }
