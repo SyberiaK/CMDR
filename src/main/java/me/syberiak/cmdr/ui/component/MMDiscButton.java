@@ -3,30 +3,29 @@ package me.syberiak.cmdr.ui.component;
 import me.syberiak.cmdr.CMDR;
 import me.syberiak.cmdr.ui.MMDiscDialog;
 
-import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+import java.awt.event.MouseAdapter;
 import java.net.URL;
 import javax.swing.JButton;
 import javax.swing.ImageIcon;
 
 public class MMDiscButton extends JButton {
-    public String RECORD;
-    public ImageIcon DISC_ICON;
-    public String DISC_FULL_NAME;
+    public String record;
+    public ImageIcon icon;
+    public String discFullName;
 
     public MMDiscButton(String text, String discFullName, String record, URL iconURL) {
         super(text);
 
-        RECORD = record;
-        DISC_ICON = new ImageIcon(iconURL);
-        DISC_FULL_NAME = discFullName;
+        this.record = record;
+        this.icon = new ImageIcon(iconURL);
+        this.discFullName = discFullName;
 
-        addActionListener(e -> new MMDiscDialog(DISC_FULL_NAME, RECORD, DISC_ICON));
+        addActionListener(e -> new MMDiscDialog(discFullName, record, icon));
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
-                CMDR.manager.changeDiscLabel(DISC_ICON, DISC_FULL_NAME);
+                CMDR.manager.changeDiscLabel(icon, discFullName);
             }
 
             @Override
