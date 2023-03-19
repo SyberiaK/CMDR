@@ -4,20 +4,13 @@ import java.awt.*;
 import java.io.File;
 import java.net.URL;
 import java.util.List;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextArea;
-import javax.swing.ImageIcon;
-import javax.swing.UIManager;
-import javax.swing.JOptionPane;
-import javax.swing.JFileChooser;
-import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.*;
 
 import me.syberiak.cmdr.CMDR;
+import me.syberiak.cmdr.config.Config;
+import me.syberiak.cmdr.io.FileManager;
 import me.syberiak.cmdr.ui.component.MMDiscButton;
 import me.syberiak.cmdr.ui.component.MMMenuBar;
-import me.syberiak.cmdr.util.OGGAudioConverter;
 
 public class ManagerMenu extends JFrame {
 
@@ -130,39 +123,51 @@ public class ManagerMenu extends JFrame {
         discLabel.setText(discFullName);
     }
 
-    void setDefaultRecord(String record) {
-        File recordFile = new File(CMDR.RECORD_DIR + record);
-        if (recordFile.exists()) {
-            if (recordFile.delete()) {
-                CMDR.LOGGER.info(record + ": returned default record successfully.");
-            } else {
-                CMDR.LOGGER.error(record + ": failed to return default record.");
+    boolean revertRecord(String recordName) {
+        try {
+            switch (Config.getInstance().getSelectedLauncher()) {
+                case Vanilla:
+                    FileManager.revertRecordForVanilla(recordName);
+                    return true;
+                case Prism:
+                    FileManager.revertRecordForPrism(recordName);
+                    return true;
+                default:
+                    throw new Exception("Found unknown launcher");
             }
+        } catch (Exception e) {
+            CMDR.LOGGER.error("Converting exception occurred!", e);
+            JOptionPane.showMessageDialog(this,
+                    "Converting exception occurred!\n" + e, "CMDR Manager",
+                    JOptionPane.WARNING_MESSAGE);
+            return false;
         }
     }
 
-    void setCustomRecord(String record) {
-        JFileChooser fc = new JFileChooser();
-        fc.setFileFilter(new FileNameExtensionFilter("MP3/WAV/OGG audio (*.mp3, *.wav, *.ogg)",
-                "mp3", "wav", "ogg"));
+    boolean setRecord(File source, String recordName) {
+        statusBar.setText("Trying to convert your audio...");
 
-        int fcOption = fc.showOpenDialog(this);
-        if (fcOption == JFileChooser.APPROVE_OPTION) {
-            statusBar.setText("Trying to convert your audio...");
-            try {
-                String source = fc.getSelectedFile().getAbsolutePath();
-                String target = CMDR.RECORD_DIR + record;
-
-                OGGAudioConverter.convert(source, target);
-                CMDR.LOGGER.info(source + ": converted successfully to " + target);
-                statusBar.setText("Done!");
-            } catch (Exception e) {
-                CMDR.LOGGER.error("Converting exception occurred!", e);
-                JOptionPane.showMessageDialog(this,
-                        "Got an exception while converting:\n" + e, "CMDR Manager",
-                        JOptionPane.WARNING_MESSAGE);
-                statusBar.setText("");
+        try {
+            switch (Config.getInstance().getSelectedLauncher()) {
+                case Vanilla:
+                    FileManager.setCustomRecordForVanilla(source, recordName);
+                    break;
+                case Prism:
+                    FileManager.setCustomRecordForPrism(source, recordName);
+                    break;
+                default:
+                    throw new Exception("Found unknown launcher");
             }
+
+            statusBar.setText("Done!");
+            return true;
+        } catch (Exception e) {
+            CMDR.LOGGER.error("Converting exception occurred!", e);
+            JOptionPane.showMessageDialog(this,
+                    "Converting exception occurred!\n" + e, "CMDR Manager",
+                    JOptionPane.WARNING_MESSAGE);
+            statusBar.setText("");
+            return false;
         }
     }
 }
