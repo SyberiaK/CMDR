@@ -1,27 +1,41 @@
 package me.syberiak.cmdr.ui;
 
-import java.io.File;
-import java.awt.Image;
-import java.awt.Insets;
-import java.awt.Dimension;
-import java.awt.BorderLayout;
-import java.awt.GridBagLayout;
-import java.awt.GridBagConstraints;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.ImageIcon;
+import java.awt.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import me.syberiak.cmdr.CMDR;
+import me.syberiak.cmdr.config.Config;
+import me.syberiak.cmdr.io.ResourcePack;
+import me.syberiak.cmdr.util.OGGAudioConverter;
+
 public class MMDiscDialog extends JDialog {
 
     static final int DIALOG_WIDTH = 480;
     static final int DIALOG_HEIGHT = 360;
 
-    public MMDiscDialog(String discFullName, String record, ImageIcon discIcon) {
+    public MMDiscDialog(String discFullName, String recordName, ImageIcon discIcon) {
         super(CMDR.manager, "CMDR Manager", true);
         this.setLayout(new BorderLayout());
+        Config config = Config.getInstance();
+        Path recordPath;
+        switch (config.getSelectedLauncher()) {
+            case Vanilla:
+                recordPath = Paths.get(config.getVanillaPath() + ResourcePack.recordsPlacement + recordName);
+                break;
+            case Prism:
+                recordPath = Paths.get(""); // todo: write an algorithm to check RP content in instances
+                break;
+            default:
+                Exception e = new Exception("Found unknown launcher");
+                CMDR.LOGGER.error("Exception occurred!", e);
+                JOptionPane.showMessageDialog(this,
+                        "Exception occurred!\n" + e, "CMDR Manager",
+                        JOptionPane.WARNING_MESSAGE);
+                return;
+        }
 
         GridBagConstraints c = new GridBagConstraints();
         c.fill = GridBagConstraints.HORIZONTAL;
@@ -37,7 +51,7 @@ public class MMDiscDialog extends JDialog {
 
         JButton setDefaultButton = new JButton("Set default record");
         setDefaultButton.setFocusable(false);
-        if (!new File(CMDR.RECORD_DIR + record).exists()) { setDefaultButton.setEnabled(false); }
+        if (!recordPath.toFile().exists()) { setDefaultButton.setEnabled(false); }
         JButton setCustomButton = new JButton("Set custom record");
         setCustomButton.setFocusable(false);
 
@@ -45,15 +59,26 @@ public class MMDiscDialog extends JDialog {
         bottomMargin.setPreferredSize(new Dimension(50, 60));
 
         setDefaultButton.addActionListener(e -> {
-            CMDR.manager.setDefaultRecord(record);
-            setDefaultButton.setText("Done!"); 
-            setDefaultButton.setEnabled(false);
+            boolean result = CMDR.manager.revertRecord(recordName);
+            if (result) {
+                setDefaultButton.setText("Done!");
+                setDefaultButton.setEnabled(false);
+            }
         });
 
         setCustomButton.addActionListener(e -> {
-            CMDR.manager.setCustomRecord(record);
-            setDefaultButton.setText("Set default record");
-            if (new File(CMDR.RECORD_DIR + record).exists()) { setDefaultButton.setEnabled(true); }
+            JFileChooser fc = new JFileChooser();
+            fc.setFileFilter(new FileNameExtensionFilter("MP3/WAV/OGG audio (*.mp3, *.wav, *.ogg)",
+                    OGGAudioConverter.SUPPORTED_FORMATS));
+
+            int fcOption = fc.showOpenDialog(this);
+            if (fcOption == JFileChooser.APPROVE_OPTION) {
+                boolean result = CMDR.manager.setRecord(fc.getSelectedFile(), recordName);
+                if (result) {
+                    setDefaultButton.setText("Set default record");
+                }
+            }
+            if (recordPath.toFile().exists()) { setDefaultButton.setEnabled(true); }
         });
 
         c.gridx = 0;
