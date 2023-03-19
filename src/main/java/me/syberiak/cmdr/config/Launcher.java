@@ -1,9 +1,8 @@
-package me.syberiak.cmdr.rp;
+package me.syberiak.cmdr.config;
 
 import java.util.Arrays;
 
 public enum Launcher {
-    None("None"),
     Vanilla("Vanilla"),
     Prism("Prism");
 
@@ -11,8 +10,7 @@ public enum Launcher {
     public final String name;
 
     Launcher(String name) {
-        this.id = name.toLowerCase();
-        this.name = name;
+        this(name.toLowerCase(), name);
     }
 
     Launcher(String id, String name) {
