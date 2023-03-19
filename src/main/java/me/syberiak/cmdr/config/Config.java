@@ -8,15 +8,15 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Locale;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
 import me.syberiak.cmdr.CMDR;
-import me.syberiak.cmdr.rp.Launcher;
 
 public class Config extends ConfigWrapper {
-    // Config object fields
     AppConfig app;
     Bindings bindings;
 
@@ -35,8 +35,8 @@ public class Config extends ConfigWrapper {
     public void selectLauncher(Launcher launcher) {
         bindings.selectedLauncher = launcher.id;
     }
-    public String getVanillaPath() {
-        return bindings.vanilla.path;
+    public Path getVanillaPath() {
+        return Paths.get(bindings.vanilla.path);
     }
 
     public void setVanillaPath(Path path) {
@@ -47,8 +47,8 @@ public class Config extends ConfigWrapper {
         bindings.vanilla.path = path;
     }
 
-    public String getPrismPath() {
-        return bindings.prism.path;
+    public Path getPrismPath() {
+        return Paths.get(bindings.prism.path);
     }
 
     public void setPrismPath(String path) {
@@ -60,6 +60,19 @@ public class Config extends ConfigWrapper {
     }
     public void setPrismInstances(String[] instances) {
         bindings.prism.instances = instances;
+    }
+
+    public Path[] getPrismInstancesPaths() {
+        Path prismPath = getPrismPath();
+        String[] instances = getPrismInstances();
+
+        Path[] instancesPaths = new Path[instances.length];
+
+        for (int i = 0; i < instances.length; i++) {
+            instancesPaths[i] = Paths.get(prismPath + "/instances", instances[i]);
+        }
+
+        return instancesPaths;
     }
 
     // Container classes
