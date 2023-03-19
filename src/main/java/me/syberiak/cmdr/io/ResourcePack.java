@@ -1,21 +1,23 @@
-package me.syberiak.cmdr.rp;
+package me.syberiak.cmdr.io;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 
 import org.json.JSONObject;
 import me.syberiak.cmdr.CMDR;
 
 public class ResourcePack {
     private static final String packPlacement = "/resourcepacks/CMDR";
-    private static final String recordsPlacement = "/assets/minecraft/sounds/records";
-    private static final String metaPlacement = "/pack.mcmeta";
-    private static final String iconPlacement = "/pack.png";
-    public static void initialize(String path) {
-        String packDir = path + packPlacement;
-        File pack = new File(packDir + recordsPlacement);
+    public static final String recordsPlacement = packPlacement + "/assets/minecraft/sounds/records/";
+    private static final String metaPlacement = packPlacement + "/pack.mcmeta";
+    private static final String iconPlacement = packPlacement + "/pack.png";
+
+    public static void initialize(Path path) {
+        File pack = new File(path + recordsPlacement);
         if (!pack.exists()) {
             if (pack.mkdirs()) {
                 CMDR.LOGGER.info("RP: generated successfully.");
@@ -24,7 +26,7 @@ public class ResourcePack {
             }
         }
 
-        File packMeta = new File(packDir + metaPlacement);
+        File packMeta = new File(path + metaPlacement);
 
         if (!packMeta.exists()) {
             JSONObject metaObject = new JSONObject();
@@ -38,19 +40,19 @@ public class ResourcePack {
             try (FileWriter filewriter = new FileWriter(packMeta)) {
                 filewriter.write(metaObject.toString());
                 CMDR.LOGGER.info("RP's pack.mcmeta: generated successfully.");
-            } catch (Exception e) {
+            } catch (IOException e) {
                 CMDR.LOGGER.error("RP's pack.mcmeta: failed generating. Reason:", e);
             }
         }
 
-        File packIcon = new File(packDir + iconPlacement);
+        File packIcon = new File(path + iconPlacement);
 
         if (!packIcon.exists()) {
             try (InputStream iconStream = CMDR.class.getResourceAsStream("/icon.png")) {
                 assert iconStream != null;
                 Files.copy(iconStream, packIcon.toPath());
                 CMDR.LOGGER.info("RP's pack icon: generated successfully.");
-            } catch (Exception e) {
+            } catch (IOException e) {
                 CMDR.LOGGER.error("RP's pack icon: failed generating. Reason:", e);
             }
         }
