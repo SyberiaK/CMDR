@@ -12,17 +12,10 @@ import ws.schild.jave.encode.EncodingAttributes;
 
 public class OGGAudioConverter implements Runnable {
 
-    static String[] SUPPORTED_FORMATS = {"mp3", "wav", "ogg"};
-    String source;
-    String target;
+    public static String[] SUPPORTED_FORMATS = {"mp3", "wav", "ogg"};
 
-    OGGAudioConverter(String source, String target) {
-        this.source = source;
-        this.target = target;
-    }
-
-    @Override
-    public void run() {
+    static EncodingAttributes encoderAttrs;
+    static {
         AudioAttributes audioAttrs = new AudioAttributes();
         audioAttrs.setBitRate(196000);
         audioAttrs.setSamplingRate(44100);
@@ -30,26 +23,43 @@ public class OGGAudioConverter implements Runnable {
         audioAttrs.setQuality(100);
         audioAttrs.setCodec("libvorbis");
 
-        EncodingAttributes encoderAttrs = new EncodingAttributes();
+        encoderAttrs = new EncodingAttributes();
         encoderAttrs.setOutputFormat("ogg");
         encoderAttrs.setAudioAttributes(audioAttrs);
+    }
+    File source;
+    File target;
 
+
+
+    OGGAudioConverter(File source, File target) {
+        this.source = source;
+        this.target = target;
+    }
+
+    @Override
+    public void run() {
         Encoder encoder = new Encoder();
         try {
-            encoder.encode(new MultimediaObject(new File(source)), new File(target), encoderAttrs);
+            encoder.encode(new MultimediaObject(source), target, encoderAttrs);
         } catch (EncoderException e) {
             Thread t = Thread.currentThread();
             t.getUncaughtExceptionHandler().uncaughtException(t, e);
         }
     }
 
-    public static void convert(String source, String target) throws Exception {
-        boolean isCorrectFormat = Arrays.asList(SUPPORTED_FORMATS)
-                .contains(FilenameUtils.getExtension(source));
+    public static void convert(File source, File target) throws Exception {
+        boolean isCorrectSourceFormat = Arrays.asList(SUPPORTED_FORMATS)
+                .contains(FilenameUtils.getExtension(source.toString()));
+        boolean isCorrectTargetFormat = source.toPath().endsWith(".ogg");
 
-        if (!isCorrectFormat) {
+        if (!isCorrectSourceFormat) {
             throw new Exception(String.format("Wrong source file extension of %s" +
                             " (.mp3, .wav and .ogg supported)", source));
+        }
+        if (!isCorrectTargetFormat) {
+            throw new Exception(String.format("Wrong target file extension of %s" +
+                    " (must be .ogg)", target));
         }
 
         OGGAudioConverter ac = new OGGAudioConverter(source, target);
