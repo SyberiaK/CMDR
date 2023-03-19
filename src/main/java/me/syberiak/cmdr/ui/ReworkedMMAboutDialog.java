@@ -5,6 +5,8 @@ import me.syberiak.cmdr.ui.component.MMHyperlink;
 
 import javax.swing.*;
 import java.awt.event.*;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 public class ReworkedMMAboutDialog extends JDialog {
     private JPanel contentPane;
@@ -49,7 +51,14 @@ public class ReworkedMMAboutDialog extends JDialog {
         setTitle("CMDR Manager");
 
         versionLabel = new JLabel(CMDR.VERSION_V);
-        String changelogLink = "https://github.com/SyberiaK/CMDR/releases/tag/" + CMDR.VERSION_V;
+        URL changelogLink;
+        try {
+            changelogLink = new URL("https://github.com/SyberiaK/CMDR/releases/tag/" + CMDR.VERSION_V);
+        } catch (MalformedURLException e) {
+            CMDR.LOGGER.error("Failed.. parsing changelog link?... how?", e);
+            changelogLink = null;
+        }
+
 
         changelogLinkLabel = new MMHyperlink("What's New?",
                 changelogLink,

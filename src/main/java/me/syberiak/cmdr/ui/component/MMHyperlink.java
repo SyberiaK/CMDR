@@ -8,28 +8,28 @@ import java.awt.Desktop;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 
 import javax.swing.JLabel;
 
 public class MMHyperlink extends JLabel {
-    private String url;
-    private static final String html = "<html><a href=''>%s</a></html>";
+    private URL url;
+    private static final String HTML = "<html><a href=''>%s</a></html>";
 
     public MMHyperlink(String text) {
         this(text, null, null);
     }
 
-    public MMHyperlink(String text, String url) {
+    public MMHyperlink(String text, URL url) {
         this(text, url, null);
     }
 
-    public void setURL(String url) {
+    public void setURL(URL url) {
         this.url = url;
     }
 
-    public MMHyperlink(String text, String url, String tooltip) {
+    public MMHyperlink(String text, URL url, String tooltip) {
         super(text);
         this.url = url;
 
@@ -42,7 +42,7 @@ public class MMHyperlink extends JLabel {
 
             @Override
             public void mouseEntered(MouseEvent e) {
-                setText(String.format(html, text));
+                setText(String.format(HTML, text));
             }
 
             @Override
@@ -53,7 +53,7 @@ public class MMHyperlink extends JLabel {
             @Override
             public void mouseClicked(MouseEvent e) {
                 try {
-                    Desktop.getDesktop().browse(new URI(MMHyperlink.this.url));
+                    Desktop.getDesktop().browse(MMHyperlink.this.url.toURI());
                 } catch (IOException | URISyntaxException e1) {
                     CMDR.LOGGER.error("Redirecting to changelog failed! Reason: " + e1);
                 }
