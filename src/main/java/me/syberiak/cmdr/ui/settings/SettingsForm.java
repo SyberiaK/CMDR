@@ -1,7 +1,7 @@
 package me.syberiak.cmdr.ui.settings;
 
 
-import me.syberiak.cmdr.rp.Launcher;
+import me.syberiak.cmdr.config.Launcher;
 
 import javax.swing.*;
 
